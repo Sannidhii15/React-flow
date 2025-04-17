@@ -1,0 +1,21 @@
+react-flow-project/
+├── public/                   # Static assets
+│   ├── index.html           # HTML entry point
+│   └── favicon.ico          # Favicon
+├── src/                     # Source code
+│   ├── assets/              # Images, fonts, etc. (optional)
+│   ├── components/          # React components
+│   │   ├── NodeTypes/       # Custom node components
+│   │   │   ├── InputNode.js        # Custom node type 1
+│   │   │   ├── OutputNode.js       # Custom node type 2
+│   │   │   
+│   │   └── FlowCanvas.js    # Main React Flow component
+│   ├── data/                # Separate folder for JSON files
+│   │   ├── inputNode.json   # JSON for InputNode
+│   │   ├── outputNode.json  # JSON for OutputNode
+│   │   └── processNode.json # JSON for ProcessNode
+│   ├── App.js               # Main app component
+│   ├── index.js             # Entry point for React
+│   └── styles.css           # Global styles
+├── package.json             # Project dependencies
+└── README.md                # Project documentation
