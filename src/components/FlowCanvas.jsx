@@ -1078,6 +1078,7 @@ const defaultEdges = [
   { id: 'e13-4', source: '13', target: '4', style: { stroke: 'Black' } },
   // { id: 'e4-6', source: '4', target: '6', label: 'IT', style: { stroke: 'Black' } },
   { id: 'e4-7', source: '4', target: '7',  style: { stroke: 'Black' } },
+  
   { id: 'e7-15', source: '7', target: '15',  style: { stroke: 'Black' } },
   { id: 'e7-17', source: '7', target: '17',  style: { stroke: 'Black' } },
   // { id: 'e4-8', source: '4', target: '8', label: 'Finance', style: { stroke: 'Black' } },
