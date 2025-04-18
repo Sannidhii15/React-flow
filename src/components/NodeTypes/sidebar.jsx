@@ -1655,7 +1655,7 @@
 // export default Sidebar;
 
 import React, { useState, useEffect } from 'react';
-import { X, PlusCircle, Trash2, Save, Eye, EyeOff, ChevronRight, ChevronDown } from 'lucide-react';
+import { X, PlusCircle, Trash2, Save, Eye, EyeOff, ChevronRight, ChevronDown, CheckCircle } from 'lucide-react';
 
 const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edges, nodes, flowType }) => {
   const sidebarStyle = {
@@ -1679,7 +1679,10 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
   const [ticketingSelected, setTicketingSelected] = useState('');
   const [vectordatabseSelected, setVectordatabseSelected] = useState('');
   const [authSelected, setAuthSelected] = useState('');
-  const [authUrl, setAuthUrl] = useState('');
+  const [redirectUri, setRedirectUri] = useState(''); // New state for redirectUri
+  const [clientId, setClientId] = useState(''); // New state for clientId
+  const [clientSecret, setClientSecret] = useState(''); // New state for clientSecret
+  const [tenantId, setTenantId] = useState(''); // New state for tenantId
   const [departments, setDepartments] = useState([]);
   const [newNodeType, setNewNodeType] = useState('');
   const [previewMode, setPreviewMode] = useState(false);
@@ -1696,6 +1699,7 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
   const [connectionType, setConnectionType] = useState('standard');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [edgeUpdateSuccess, setEdgeUpdateSuccess] = useState(false);
+  const [verifySuccess, setVerifySuccess] = useState(null);
 
   // State variables for Knowledge Repository
   const [selectedDepartment, setSelectedDepartment] = useState('');
@@ -1731,7 +1735,10 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
       setNewDepartment(selectedNode.data?.newDepartment || '');
       setTicketingSelected(selectedNode.data?.ticketingSelected || 'ServiceNow');
       setAuthSelected(selectedNode.data?.authSelected || 'Azure');
-      setAuthUrl(selectedNode.data?.authUrl || '');
+      setRedirectUri(selectedNode.data?.redirectUri || ''); // Initialize redirectUri
+      setClientId(selectedNode.data?.clientId || ''); // Initialize clientId
+      setClientSecret(selectedNode.data?.clientSecret || ''); // Initialize clientSecret
+      setTenantId(selectedNode.data?.tenantId || ''); // Initialize tenantId
       setVectordatabseSelected(selectedNode.data?.vectorDatabaseSelected || 'Milvus');
       setDepartments(selectedNode.data?.departments || []);
       setNodeDescription(selectedNode.data?.description || selectedNode.description || '');
@@ -1860,11 +1867,32 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
     updateNodeData(selectedNode.id, { authSelected: value });
   };
 
-  const handleAuthUrlChange = (e) => {
+  const handleRedirectUriChange = (e) => {
     if (!selectedNode) return;
     const value = e.target.value;
-    setAuthUrl(value);
-    updateNodeData(selectedNode.id, { authUrl: value });
+    setRedirectUri(value);
+    updateNodeData(selectedNode.id, { redirectUri: value });
+  };
+
+  const handleClientIdChange = (e) => {
+    if (!selectedNode) return;
+    const value = e.target.value;
+    setClientId(value);
+    updateNodeData(selectedNode.id, { clientId: value });
+  };
+
+  const handleClientSecretChange = (e) => {
+    if (!selectedNode) return;
+    const value = e.target.value;
+    setClientSecret(value);
+    updateNodeData(selectedNode.id, { clientSecret: value });
+  };
+
+  const handleTenantIdChange = (e) => {
+    if (!selectedNode) return;
+    const value = e.target.value;
+    setTenantId(value);
+    updateNodeData(selectedNode.id, { tenantId: value });
   };
 
   const handleNameChange = (e) => {
@@ -1913,7 +1941,7 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
         predefinedJson: `${newNodeType}Node.json`,
         greeting: '',
         departments: [],
-        onOptions: selectedNode?.data?.onOptions || (() => {}),
+        onOptions: selectedNode?.data?.onOptions || (() => { }),
       },
     };
 
@@ -2092,6 +2120,100 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
           </div>
         );
 
+      // case 'authenticatedNode':
+      // case 'notAuthenticatedNode':
+      //   return (
+      //     <div className="node-control-group">
+      //       <h4>Select Identity Provider</h4>
+      //       <select
+      //         value={authSelected}
+      //         onChange={handleAuthChange}
+      //         style={{
+      //           width: '100%',
+      //           padding: '10px',
+      //           borderRadius: '4px',
+      //           border: '1px solid #ddd',
+      //           marginBottom: '10px',
+      //         }}
+      //       >
+      //         <option value="Azure">Azure AD</option>
+      //         <option value="Google">Google</option>
+      //         <option value="Okta">Okta</option>
+      //         <option value="Auth0">Auth0</option>
+      //         <option value="AWS">AWS Cognito</option>
+      //       </select>
+      //       <div style={{ marginBottom: '10px' }}>
+      //         <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      //           Identity Provider URL
+      //         </label>
+      //         <input
+      //           type="url"
+      //           value={authUrl}
+      //           onChange={handleAuthUrlChange}
+      //           placeholder={`Enter ${authSelected || 'provider'} URL`}
+      //           style={{
+      //             width: '100%',
+      //             padding: '10px',
+      //             borderRadius: '4px',
+      //             border: '1px solid #ddd',
+      //           }}
+      //         />
+      //       </div>
+      //       <button
+      //         onClick={async () => {
+      //           if (selectedNode && authSelected && authUrl) {
+      //             try {
+      //               const response = await fetch('http://127.0.0.1:5100/api/get-uri', {
+      //                 method: 'POST',
+      //                 headers: {
+      //                   'Content-Type': 'application/json',
+      //                 },
+      //                 body: JSON.stringify({
+      //                   integrationType: authSelected,
+      //                   integrationUri: authUrl,
+      //                 }),
+      //               });
+
+      //               const result = await response.json();
+
+      //               if (response.ok) {
+      //                 updateNodeData(selectedNode.id, {
+      //                   authSelected,
+      //                   authUrl,
+      //                   redirectUri: result.redirectUri || '',
+      //                 });
+      //                 alert('Authentication details saved successfully!');
+      //               } else {
+      //                 alert(`Error: ${result.error}`);
+      //               }
+      //             } catch (error) {
+      //               alert(`Failed to save: ${error.message}`);
+      //             }
+      //           } else {
+      //             alert('Please select an authentication provider and enter a valid URL.');
+      //           }
+      //         }}
+      //         style={{
+      //           padding: '10px 15px',
+      //           fontSize: '14px',
+      //           fontWeight: 'bold',
+      //           cursor: 'pointer',
+      //           backgroundColor: '#3182ce',
+      //           color: 'white',
+      //           border: 'none',
+      //           borderRadius: '4px',
+      //           display: 'flex',
+      //           alignItems: 'center',
+      //           gap: '5px',
+      //           width: '100%',
+      //           justifyContent: 'center',
+      //         }}
+      //       >
+      //         <Save size={18} /> Save
+      //       </button>
+      //     </div>
+      //   );
+
       case 'authenticatedNode':
       case 'notAuthenticatedNode':
         return (
@@ -2116,13 +2238,13 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
             </select>
             <div style={{ marginBottom: '10px' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                Identity Provider URL
+                Redirect URI
               </label>
               <input
                 type="url"
-                value={authUrl}
-                onChange={handleAuthUrlChange}
-                placeholder={`Enter ${authSelected || 'provider'} URL`}
+                value={redirectUri}
+                onChange={handleRedirectUriChange}
+                placeholder={`Enter ${authSelected || 'provider'} redirect URI`}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -2131,58 +2253,184 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
                 }}
               />
             </div>
+            <div style={{ marginBottom: '10px' }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Client ID
+              </label>
+              <input
+                type="text"
+                value={clientId}
+                onChange={handleClientIdChange}
+                placeholder="Enter client ID"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                }}
+              />
+            </div>
+            <div style={{ marginBottom: '10px' }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Client Secret
+              </label>
+              <input
+                type="password"
+                value={clientSecret}
+                onChange={handleClientSecretChange}
+                placeholder="Enter client secret"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                }}
+              />
+            </div>
+            <div style={{ marginBottom: '10px' }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Tenant ID
+              </label>
+              <input
+                type="text"
+                value={tenantId}
+                onChange={handleTenantIdChange}
+                placeholder="Enter tenant ID"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
             <button
-              onClick={async () => {
-                if (selectedNode && authSelected && authUrl) {
-                  try {
-                    const response = await fetch('http://127.0.0.1:5100/api/get-uri', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        integrationType: authSelected,
-                        integrationUri: authUrl,
-                      }),
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok) {
-                      updateNodeData(selectedNode.id, {
-                        authSelected,
-                        authUrl,
-                        redirectUri: result.redirectUri || '',
+                onClick={async () => {
+                  if (selectedNode && clientId && clientSecret && tenantId && authSelected === 'Azure') {
+                    try {
+                      const response = await fetch('http://127.0.0.1:5100/api/verify-azure-credentials', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          clientID: clientId,
+                          clientSECRET: clientSecret,
+                          tenantID: tenantId,
+                        }),
                       });
-                      alert('Authentication details saved successfully!');
-                    } else {
-                      alert(`Error: ${result.error}`);
+
+                      const result = await response.json();
+
+                      if (response.ok) {
+                        setVerifySuccess({ message: result.message, isError: false });
+                      } else {
+                        setVerifySuccess({ message: result.message, isError: true });
+                      }
+                    } catch (error) {
+                      setVerifySuccess({
+                        message: `Verification failed: ${error.message}`,
+                        isError: true,
+                      });
                     }
-                  } catch (error) {
-                    alert(`Failed to save: ${error.message}`);
+                    setTimeout(() => setVerifySuccess(null), 3000);
+                  } else {
+                    setVerifySuccess({
+                      message: 'Please fill in all Azure credential fields and select Azure as provider.',
+                      isError: true,
+                    });
+                    setTimeout(() => setVerifySuccess(null), 3000);
                   }
-                } else {
-                  alert('Please select an authentication provider and enter a valid URL.');
-                }
-              }}
-              style={{
-                padding: '10px 15px',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                backgroundColor: '#3182ce',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                width: '100%',
-                justifyContent: 'center',
-              }}
-            >
-              <Save size={18} /> Save
-            </button>
+                }}
+                style={{
+                  padding: '10px 15px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  backgroundColor: '#38a169',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  flex: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <CheckCircle size={18} /> Verify
+              </button>
+              <button
+                onClick={async () => {
+                  if (selectedNode && authSelected && redirectUri && clientId && clientSecret && tenantId) {
+                    try {
+                      const response = await fetch('http://127.0.0.1:5100/api/get-uri', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          integrationType: authSelected,
+                          redirectURI: redirectUri,
+                          clientID: clientId,
+                          clientSECRET: clientSecret,
+                          tenantID: tenantId,
+                        }),
+                      });
+
+                      const result = await response.json();
+
+                      if (response.ok) {
+                        updateNodeData(selectedNode.id, {
+                          authSelected,
+                          redirectUri,
+                          clientId,
+                          clientSecret,
+                          tenantId,
+                        });
+                        alert('Authentication details saved successfully!');
+                      } else {
+                        alert(`Error: ${result.error}`);
+                      }
+                    } catch (error) {
+                      alert(`Failed to save: ${error.message}`);
+                    }
+                  } else {
+                    alert('Please select an authentication provider and fill in all fields.');
+                  }
+                }}
+                style={{
+                  padding: '10px 15px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  backgroundColor: '#3182ce',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  flex: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <Save size={18} /> Save
+              </button>
+              
+            </div>
+            {verifySuccess && (
+              <div
+                style={{
+                  textAlign: 'center',
+                  color: verifySuccess.isError ? '#dc3545' : '#38a169',
+                  marginTop: '10px',
+                }}
+              >
+                {verifySuccess.message}
+              </div>
+            )}
           </div>
         );
 
@@ -2770,7 +3018,7 @@ const Sidebar = ({ selectedNode, isOpen, toggleSidebar, setNodes, setEdges, edge
             height: '50px',
             borderRadius: '50%',
             backgroundColor: '#3182ce',
-            color: 'white', 
+            color: 'white',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
