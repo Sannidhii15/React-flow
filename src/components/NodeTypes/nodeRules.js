@@ -33,5 +33,3 @@ export const nodeConnections = {
     gladMessage: 'Glad Message',
     ticketcreated: 'Ticket Created'
   };
-
-

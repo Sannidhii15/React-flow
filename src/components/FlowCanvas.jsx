@@ -1227,6 +1227,7 @@ const FlowCanvas = () => {
             return [...nds, newNode];
           });
           break;
+        
         default:
           break;
       }
